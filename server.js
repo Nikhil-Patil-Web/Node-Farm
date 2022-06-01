@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 
 const app = require('./app');
+const { trace } = require('./app');
 
 console.log(app.get('env'));
 
@@ -16,7 +17,8 @@ mongoose
   .connect(DB, {
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindandModify: false,
+    useFindAndModify: true,
+    useUnifiedTopology: true,
   })
   .then(() => {
     console.log('DB has been Connected!');
