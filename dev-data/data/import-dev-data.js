@@ -2,9 +2,10 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const fs = require('fs');
-const Tour = require('../../models/tourmodels');
+// eslint-disable-next-line import/extensions
+const Tour = require('../../models/tourmodels.js');
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './../../config.env' });
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
@@ -16,6 +17,7 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    useUnifiedTopology: true,
   })
   .then(() => console.log('DB CONNECTION SUCCESSFUL!'));
 
@@ -33,6 +35,7 @@ const importData = async () => {
   } catch (err) {
     console.log(err);
   }
+  process.exit();
 };
 
 //DELETE ALL DATA FROM DB COLLECTION
@@ -43,6 +46,13 @@ const deleteData = async () => {
   } catch (err) {
     console.log(err);
   }
+  process.exit();
 };
+
+if (process.argv[2] === '--import') {
+  importData();
+} else if (process.argv[2] === '--delete') {
+  deleteData();
+}
 
 console.log(process.argv);
