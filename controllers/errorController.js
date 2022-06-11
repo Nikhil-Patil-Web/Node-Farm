@@ -16,6 +16,9 @@ const handleValidationErrorDB = (err) => {
   const message = `Invalid input data: ${errors.join(',')}`;
   return new AppError(message, 400);
 };
+
+const handleJWTError = new AppError('Invalid token! Please login again', 401);
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -24,6 +27,11 @@ const sendErrorDev = (err, res) => {
     stack: err.stack,
   });
 };
+
+const handleJWTExpiredError = new AppError(
+  'Your token has expired!Please log in again!',
+  401
+);
 
 const sendErrorProd = (err, res) => {
   //Operational, trusted error: send message to the client
@@ -52,7 +60,7 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    const error = { ...err };
+    let error = { ...err };
     if (error.name === 'CastError') {
       // eslint-disable-next-line no-const-assign
       error = handleCastErrorDB(error);
@@ -64,6 +72,14 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'ValidationError') {
       // eslint-disable-next-line no-const-assign
       error = handleValidationErrorDB(error);
+    }
+    if (error.name === 'JsonWebTokenError') {
+      // eslint-disable-next-line no-const-assign
+      error = handleJWTError(error);
+    }
+    if (error.name === 'TokenExpiredError') {
+      // eslint-disable-next-line no-undef
+      error = handleJWTExpiredError();
     }
     sendErrorProd(error, res);
   }
