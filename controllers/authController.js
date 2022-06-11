@@ -15,6 +15,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -65,7 +66,21 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //Verification of the token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  
 
+  //Check if user still exist and is not deleted
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new AppError('The user belonging to the token does not exist', 401)
+    );
+  }
+  //Check if user has changed password by any means
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please login again', 401)
+    );
+  }
+  //Grant Access to protected route
+  req.user = currentUser;
   next();
 });
