@@ -3,6 +3,13 @@ const express = require('express');
 const router = express.Router();
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewRouter = require('./reviewRoutes');
+
+//POST/tour/231284rhefw/review
+//GET/tour/231284rhefw/reviews
+//GET/tour/231284rhefw/reviews/328y5093
+
+router.use('/:tourId/reviews', reviewRouter);
 
 // router.param('id', tourController.checkId);
 
